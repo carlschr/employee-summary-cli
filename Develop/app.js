@@ -10,26 +10,101 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
 
+//Employee objects will be pushed to this empty array
+const employees = [];
 
-// Write code to use inquirer to gather information about the development team members,
-// and to create objects for each team member (using the correct classes as blueprints!)
+//First question to determine what the next series of questions will be
+const firstQuestion = {
+    type: 'list',
+    choices: ['Manager', 'Engineer', 'Intern'],
+    message: 'What employee would you like to add?:',
+    name: 'choice'
+}
 
-// After the user has input all employees desired, call the `render` function (required
-// above) and pass in an array containing all employee objects; the `render` function will
-// generate and return a block of HTML including templated divs for each employee!
+//Manager questions
+const mq = [{
+    type: 'input',
+    name: 'name',
+    message: 'What is this manager\'s name?'
+},
+{
+    type: 'input',
+    name: 'email',
+    message: 'What is this manager\'s email?'
+},
+{
+    type: 'input',
+    name: 'extra',
+    message: 'What is this manager\'s office number?'
+}];
 
-// After you have your html, you're now ready to create an HTML file using the HTML
-// returned from the `render` function. Now write it to a file named `team.html` in the
-// `output` folder. You can use the variable `outputPath` above target this location.
-// Hint: you may need to check if the `output` folder exists and create it if it
-// does not.
+//Engineer questions
+const eq = [{
+    type: 'input',
+    name: 'name',
+    message: 'What is this engineer\'s name?'
+},
+{
+    type: 'input',
+    name: 'email',
+    message: 'What is this engineer\'s email?'
+},
+{
+    type: 'input',
+    name: 'extra',
+    message: 'What is this engineer\'s GitHub username?'
+}];
 
-// HINT: each employee type (manager, engineer, or intern) has slightly different
-// information; write your code to ask different questions via inquirer depending on
-// employee type.
+//Intern questions
+const iq = [{
+    type: 'input',
+    name: 'name',
+    message: 'What is this intern\'s name?'
+},
+{
+    type: 'input',
+    name: 'email',
+    message: 'What is this intern\'s email?'
+},
+{
+    type: 'input',
+    name: 'extra',
+    message: 'What is this intern\'s school?'
+}];
 
-// HINT: make sure to build out your classes first! Remember that your Manager, Engineer,
-// and Intern classes should all extend from a class named Employee; see the directions
-// for further information. Be sure to test out each class and verify it generates an
-// object with the correct structure and methods. This structure will be crucial in order
-// for the provided `render` function to work! ```
+//Code to answer questions based upon previous answers, push employees to the array and then create a team.html file using the render function
+const questionChain = () => {
+    let keepGoing = true;
+    let i = 0;
+    //While the user does not choose to be done, thi loop will continue
+    while (keepGoing) {
+        //The user is asked which employee type they would like to add
+        inquirer.prompt(firstQuestion)
+        .then(answer => {
+            //Choice will be set according to the user's selection
+            const choice = answer.choice === 'Manager' ? mq :
+            answer.choice === 'Intern' ? iq :
+            answer.choice === 'Engineer' ? eq : false;
+
+            //keepGoing is set to true or false based on the user's selection
+            keepGoing = Boolean(choice);
+
+            //If keepGoing is still true, the user will be asked questions based on their selection
+            if (keepGoing) {
+                inquirer.prompt(choice)
+                .then(answers => {
+                    //The user choice is destringed to be used as the class name
+                    let EmployeeType = JSON.parse(answer.choice);
+                    //The new employee is pushed to the employees array
+                    employees.push(new EmployeeType(answers.name, i, answers.email, answers.extra));
+                })
+            };
+        });
+        i++;
+    };
+    //The team.html file is written using the render function
+    fs.writeFile(outputPath, render(employees));
+};
+
+//The app is initialized
+questionChain();
