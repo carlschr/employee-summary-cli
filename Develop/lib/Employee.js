@@ -7,19 +7,19 @@ class Employee {
     }
 
     get name() {
-        console.log(this._name)
+        return this._name;
     }
 
     get id() {
-        console.log(this._id)
+        return this._id;
     }
 
     get email() {
-        console.log(this._email)
+        return this._email;
     }
 
     get role() {
-        console.log('Employee')
+        return 'Employee';
     }
 }
 
