@@ -16,7 +16,7 @@ const employees = [];
 //First question to determine what the next series of questions will be
 const firstQuestion = {
     type: 'list',
-    choices: ['Manager', 'Engineer', 'Intern'],
+    choices: ['Manager', 'Engineer', 'Intern', 'I am done adding employees.'],
     message: 'What employee would you like to add?:',
     name: 'choice'
 }
@@ -33,7 +33,7 @@ const mq = [{
     message: 'What is this manager\'s email?'
 },
 {
-    type: 'input',
+    type: 'number',
     name: 'extra',
     message: 'What is this manager\'s office number?'
 }];
@@ -73,14 +73,14 @@ const iq = [{
 }];
 
 //Code to answer questions based upon previous answers, push employees to the array and then create a team.html file using the render function
-const questionChain = () => {
+const questionChain = async () => {
     let keepGoing = true;
     let i = 0;
     //While the user does not choose to be done, thi loop will continue
     while (keepGoing) {
         //The user is asked which employee type they would like to add
-        inquirer.prompt(firstQuestion)
-        .then(answer => {
+        await inquirer.prompt(firstQuestion)
+        .then(async answer => {
             //Choice will be set according to the user's selection
             const choice = answer.choice === 'Manager' ? mq :
             answer.choice === 'Intern' ? iq :
@@ -91,10 +91,10 @@ const questionChain = () => {
 
             //If keepGoing is still true, the user will be asked questions based on their selection
             if (keepGoing) {
-                inquirer.prompt(choice)
+                await inquirer.prompt(choice)
                 .then(answers => {
                     //The user choice is destringed to be used as the class name
-                    let EmployeeType = JSON.parse(answer.choice);
+                    let EmployeeType = eval(answer.choice);
                     //The new employee is pushed to the employees array
                     employees.push(new EmployeeType(answers.name, i, answers.email, answers.extra));
                 })
@@ -103,7 +103,7 @@ const questionChain = () => {
         i++;
     };
     //The team.html file is written using the render function
-    fs.writeFile(outputPath, render(employees));
+    fs.writeFile(outputPath, render(employees), () => console.log('Your team.html file has been added to "output".'));
 };
 
 //The app is initialized
